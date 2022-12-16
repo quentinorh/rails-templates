@@ -6,6 +6,7 @@ inject_into_file "Gemfile", before: "group :development, :test do" do
   <<~RUBY
     gem "devise"
     gem "autoprefixer-rails"
+    gem 'tailwindcss-rails'
     gem "font-awesome-sass", "~> 6.1"
     gem "simple_form", github: "heartcombo/simple_form"
   RUBY
@@ -43,25 +44,6 @@ gsub_file(
   '<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">'
 )
 
-# Flashes
-########################################
-file "app/views/shared/_flashes.html.erb", <<~HTML
-  <% if notice %>
-    <div class="alert alert-info alert-dismissible fade show m-1" role="alert">
-      <%= notice %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-      </button>
-    </div>
-  <% end %>
-  <% if alert %>
-    <div class="alert alert-warning alert-dismissible fade show m-1" role="alert">
-      <%= alert %>
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
-      </button>
-    </div>
-  <% end %>
-HTML
-
 run "curl -L https://raw.githubusercontent.com/lewagon/awesome-navbars/master/templates/_navbar_wagon.html.erb > app/views/shared/_navbar.html.erb"
 
 inject_into_file "app/views/layouts/application.html.erb", after: "<body>" do
@@ -97,7 +79,7 @@ after_bundle do
   # Generators: db + simple form + pages controller
   ########################################
   rails_command "db:drop db:create db:migrate"
-  generate("simple_form:install", "--bootstrap")
+  generate("simple_form:install")
   generate(:controller, "pages", "home", "--skip-routes", "--no-test-framework")
 
   # Routes
@@ -118,6 +100,10 @@ after_bundle do
   ########################################
   generate("devise:install")
   generate("devise", "User")
+
+  # Tailwind install
+  ########################################
+  generate("tailwindcss:install")
 
   # Application controller
   ########################################
@@ -169,13 +155,6 @@ after_bundle do
   ########################################
   environment 'config.action_mailer.default_url_options = { host: "http://localhost:3000" }', env: "development"
   environment 'config.action_mailer.default_url_options = { host: "http://TODO_PUT_YOUR_DOMAIN_HERE" }', env: "production"
-
-  # Yarn
-  ########################################
-  run "yarn add bootstrap @popperjs/core"
-  append_file "app/javascript/application.js", <<~JS
-    import "bootstrap"
-  JS
 
   # Heroku
   ########################################
